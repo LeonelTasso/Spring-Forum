@@ -1,12 +1,15 @@
 package br.com.leonel.forum.forum.controller;
 
+import br.com.leonel.forum.forum.controller.dto.DetalhesTopicoDto;
 import br.com.leonel.forum.forum.controller.dto.TopicoDto;
+import br.com.leonel.forum.forum.controller.form.AtualizacaoTopicoForm;
 import br.com.leonel.forum.forum.controller.form.TopicoForm;
 import br.com.leonel.forum.forum.modelo.Topico;
 import br.com.leonel.forum.forum.repository.CursoRepository;
 import br.com.leonel.forum.forum.repository.TopicoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -41,8 +44,23 @@ public class TopicosController {
         URI uri = uriComponentsBuilder.path("/topicos/{id}").buildAndExpand(topico.getId()).toUri();
         return ResponseEntity.created(uri).body(new TopicoDto(topico));
     }
-//
-//    public TopicoDto detalhar(){
-//
-//    }
+
+    @GetMapping("/{id}")
+    public DetalhesTopicoDto detalhar(@PathVariable Long id){
+        Topico topico = topicoRepository.getOne(id);
+        return new DetalhesTopicoDto(topico) ;
+    }
+
+    @PutMapping("/{id}")
+    @Transactional
+    public ResponseEntity<TopicoDto> atualizar(@PathVariable Long id,@RequestBody @Valid AtualizacaoTopicoForm form){
+       Topico topico = form.atualizar(id, topicoRepository);
+       return ResponseEntity.ok(new TopicoDto(topico));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity remover(@PathVariable Long id){
+        topicoRepository.deleteById(id);
+        return ResponseEntity.ok().build();
+    }
 }
